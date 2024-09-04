@@ -59,6 +59,9 @@ debug: $(EXE)
 bench: all
 	./$(EXE) bench
 
+run: all
+	./$(EXE)
+
 # Clean the build
 clean:
 	rm -rf $(BUILD_DIR) $(EXE)

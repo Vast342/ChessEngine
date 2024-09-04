@@ -283,6 +283,8 @@ int16_t Engine::qSearch(Board &board, int alpha, int beta, int16_t ply) {
             }
         }
         Move move = moves[i];
+        
+        if(!board.isLegal(move)) continue;
 
         // this detects bad captures
         if(!see(board, move, 0)) {
@@ -295,9 +297,7 @@ int16_t Engine::qSearch(Board &board, int alpha, int beta, int16_t ply) {
 
         // History Pruning
         //if(moveValues[i] < qhpDepthMultiplier.value * qDepth) break;
-        if(!board.makeMove<true>(move)) {
-            continue;
-        }
+        board.makeMove<true>(move);
         testedMoves[legalMoves] = move;
         legalMoves++;
         nodes++;
@@ -594,10 +594,8 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
         if(isCapture) {
             moveVictim = getType(board.pieceAtIndex(moveEndSquare));
         }
-
-        if(!board.makeMove<true>(move)) {
-            continue;
-        }
+        if(!board.isLegal(move)) continue;
+        board.makeMove<true>(move);
 
         stack[ply].ch_entry = &(*conthistTable)[board.getColorToMove()][getType(board.pieceAtIndex(moveEndSquare))][moveEndSquare][moveVictim];
         stack[ply].move = move;
@@ -739,7 +737,8 @@ std::string Engine::getPV(Board board, std::vector<uint64_t> &hashVector, int nu
     Transposition* entry = TT->getEntry(hash);
     if(entry->zobristKey == shrink(hash) && entry->flag == Exact) {
         Move bestMove = entry->bestMove;
-        if(bestMove != Move() && board.makeMove<true>(bestMove)) {
+        if(bestMove != Move() && board.isLegal(bestMove)) {
+            board.makeMove<false>(bestMove);
             std::string restOfPV = getPV(board, hashVector, numEntries);
             pv = toLongAlgebraic(bestMove) + " " + restOfPV;
         }
@@ -847,7 +846,7 @@ Move Engine::think(Board board, int softBound, int hardBound, bool info) {
                     std::swap(moves[j], moves[i]);
                 }
             }
-            if(board.makeMove<true>(moves[i])) {
+            if(board.isLegal(moves[i])) {
                 board.undoMove<true>();
                 rootBestMove = moves[i];
                 break;
@@ -976,7 +975,7 @@ Move Engine::fixedDepthSearch(Board board, int depthToSearch, bool info) {
                     std::swap(moves[j], moves[i]);
                 }
             }
-            if(board.makeMove<true>(moves[i])) {
+            if(board.isLegal(moves[i])) {
                 board.undoMove<true>();
                 rootBestMove = moves[i];
                 break;
@@ -1062,7 +1061,7 @@ std::pair<Move, int> Engine::dataGenSearch(Board board, int nodeCap) {
                     std::swap(moves[j], moves[i]);
                 }
             }
-            if(board.makeMove<true>(moves[i])) {
+            if(board.isLegal(moves[i])) {
                 board.undoMove<true>();
                 rootBestMove = moves[i];
                 break;
@@ -1137,7 +1136,7 @@ Move Engine::fixedNodesSearch(Board board, int nodeCount, bool info) {
                     std::swap(moves[j], moves[i]);
                 }
             }
-            if(board.makeMove<true>(moves[i])) {
+            if(board.isLegal(moves[i])) {
                 board.undoMove<true>();
                 rootBestMove = moves[i];
                 break;

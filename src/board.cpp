@@ -18,9 +18,9 @@
 #include "globals.h"
 #include <cstdlib>
 
-template bool Board::makeMove<false>(Move move);
+template void Board::makeMove<false>(Move move);
 template void Board::undoMove<false>();
-template bool Board::makeMove<true>(Move move);
+template void Board::makeMove<true>(Move move);
 template void Board::undoMove<true>();
 template void Board::addPiece<false>(int square, int type);
 template void Board::removePiece<false>(int square, int type);
@@ -625,7 +625,7 @@ bool Board::squareIsUnderAttack(int square) const {
     }
 }
 
-template <bool PushNNUE> bool Board::makeMove(Move move) {
+template <bool PushNNUE> void Board::makeMove(Move move) {
     //std::cout << "move " << toLongAlgebraic(move) << " on position " << getFenString() << std::endl;
     //std::cout << "makemove " << toLongAlgebraic(move) << std::endl;
     // push to vectors
@@ -760,26 +760,14 @@ template <bool PushNNUE> bool Board::makeMove(Move move) {
             break;
     }
     plyCount++;
-    // if in check, move was illegal
-    if(isInCheck()) {
-        // so you must undo it and return false
-        undoMove<false>();
-        colorToMove = 1 - colorToMove;
-        //std::cout << "Changing Color To Move, move was illegal\n";
-        return false;
+    if constexpr(PushNNUE) {
+        nnueState.performUpdatesAndPush(updates, stateHistory.back().kingSquares[0], stateHistory.back().kingSquares[1], stateHistory.back());
     } else {
-        if constexpr(PushNNUE) {
-            nnueState.performUpdatesAndPush(updates, stateHistory.back().kingSquares[0], stateHistory.back().kingSquares[1], stateHistory.back());
-        } else {
-            nnueState.performUpdates(updates, stateHistory.back().kingSquares[0], stateHistory.back().kingSquares[1], stateHistory.back());
-        }
-        // otherwise it's good, move on
-        colorToMove = 1 - colorToMove;
-        stateHistory.back().threats = calculateThreats();
-        //std::cout << "Changing Color To Move, move was legal\n";
-        stateHistory.back().zobristHash ^= zobColorToMove;
-        return true;
+        nnueState.performUpdates(updates, stateHistory.back().kingSquares[0], stateHistory.back().kingSquares[1], stateHistory.back());
     }
+    colorToMove = 1 - colorToMove;
+    stateHistory.back().threats = calculateThreats();
+    stateHistory.back().zobristHash ^= zobColorToMove;
 }
 
 template <bool PushNNUE> void Board::undoMove() {
@@ -882,7 +870,7 @@ bool Board::isRepeatedPosition() {
     return false;
 }
 
-bool Board::isLegalMove(const Move& move) {
+bool Board::isLegal(const Move& move) {
     std::array<Move, 256> moves;
     const int totalMoves = getMoves(moves);
     for(int i = 0; i < totalMoves; i++) {

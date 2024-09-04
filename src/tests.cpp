@@ -25,7 +25,8 @@ int perft(Board &board, int depth) {
     int numMoves = board.getMoves(moves);
     int result = 0;
     for(int i = 0; i < numMoves; i++) {
-        if(board.makeMove<false>(moves[i])) {
+        if(board.isLegal(moves[i])) {
+            board.makeMove<false>(moves[i]);
             result += perft(board, depth-1);
             board.undoMove<false>();
         }
@@ -69,7 +70,7 @@ void splitPerft(Board board, int depth) {
     int total = 0;
     clock_t start = clock();
     for(int i = 0; i < numMoves; i++) {
-        if(board.makeMove<false>(moves[i])) {
+        if(board.isLegal(moves[i])) {
             int result = perft(board, depth - 1);
             board.undoMove<false>();
             total += result;

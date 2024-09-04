@@ -104,7 +104,7 @@ struct Board {
     public:
         Board(std::string fen);
         Board(BoardState s, int ctm);
-        template <bool PushNNUE> bool makeMove(Move move);
+        template <bool PushNNUE> void makeMove(Move move);
         template <bool PushNNUE> void undoMove();
         int getMoves(std::array<Move, 256> &moves);
         int getMovesQSearch(std::array<Move, 256> &moves);
@@ -125,7 +125,7 @@ struct Board {
         int getEnPassantIndex() const;
         uint64_t fullZobristRegen();
         bool isRepeatedPosition();
-        bool isLegalMove(const Move& move);
+        bool isLegal(const Move& move);
         uint64_t getAttackers(int square) const;
         uint64_t getColoredBitboard(int color) const;
         uint64_t getPieceBitboard(int piece) const;
