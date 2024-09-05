@@ -80,6 +80,7 @@ struct BoardState {
     uint64_t zobristHash;
     uint64_t pawnHash;
     uint64_t threats;
+    uint64_t checkers;
 };
 
 // a single move, stored in 16 bits

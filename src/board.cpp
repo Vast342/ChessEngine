@@ -218,6 +218,7 @@ Board::Board(std::string fen) {
     nnueState.refreshAccumulator(0, stateHistory.back(), stateHistory.back().kingSquares[0]);
     nnueState.refreshAccumulator(1, stateHistory.back(), stateHistory.back().kingSquares[1]);
     stateHistory.back().threats = calculateThreats();
+    stateHistory.back().checkers = getAttackers(stateHistory.back().kingSquares[colorToMove]);
 }
 
 std::string Board::getFenString() {
@@ -767,6 +768,7 @@ template <bool PushNNUE> void Board::makeMove(Move move) {
     }
     colorToMove = 1 - colorToMove;
     stateHistory.back().threats = calculateThreats();
+    stateHistory.back().checkers = getAttackers(stateHistory.back().kingSquares[colorToMove]);
     stateHistory.back().zobristHash ^= zobColorToMove;
 }
 
@@ -792,6 +794,7 @@ void Board::changeColor() {
     stateHistory.back().hundredPlyCounter++;
     colorToMove = 1 - colorToMove;
     stateHistory.back().threats = calculateThreats();
+    stateHistory.back().checkers = getAttackers(stateHistory.back().kingSquares[colorToMove]);
     stateHistory.back().zobristHash ^= zobColorToMove;
 }
 
