@@ -17,6 +17,7 @@
 */
 #include "globals.h"
 #include <cstdlib>
+#include "rays.h"
 
 template void Board::makeMove<false>(Move move);
 template void Board::undoMove<false>();

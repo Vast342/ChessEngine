@@ -37,6 +37,7 @@
 #include <memory>
 #include <cstring>
 #include <atomic>
+#include "masks.h"
 
 // nicknaming std::views because funny and also toanth
 namespace views = std::views;
@@ -156,8 +157,32 @@ struct Board {
 [[nodiscard]]std::string toLongAlgebraic(Move move);
 [[nodiscard]]uint64_t getRankMask(int rank);
 [[nodiscard]]uint64_t getFileMask(int file);
-[[nodiscard]]uint64_t getRookAttacksOld(int square, uint64_t occupiedBitboard);
-[[nodiscard]]uint64_t getBishopAttacksOld(int square, uint64_t occupiedBitboard);
+[[nodiscard]]constexpr uint64_t getRookAttacksOld(int square, uint64_t occupiedBitboard) {
+	uint64_t attacks = 0;
+	for(int direction = 0; direction < 4; direction++) {
+		uint64_t currentAttack = slideyPieceRays[direction][square];
+		if((direction & 1) == 0) {
+			currentAttack ^= slideyPieceRays[direction][std::clamp(std::countr_zero(currentAttack & occupiedBitboard), 0, 63)];
+		} else {
+			currentAttack ^= slideyPieceRays[direction][std::clamp(63 - std::countl_zero(currentAttack & occupiedBitboard), 0, 63)];
+		}
+		attacks |= currentAttack;
+    }
+	return attacks;
+}
+[[nodiscard]]constexpr uint64_t getBishopAttacksOld(int square, uint64_t occupiedBitboard) {
+	uint64_t attacks = 0;
+	for(int direction = 4; direction < 8; direction++) {
+		uint64_t currentAttack = slideyPieceRays[direction][square];
+		if((direction & 1) == 0) {
+			currentAttack ^= slideyPieceRays[direction][std::countr_zero(currentAttack & occupiedBitboard)];
+		} else {
+			currentAttack ^= slideyPieceRays[direction][63 - std::countl_zero(currentAttack & occupiedBitboard)];
+		}
+		attacks |= currentAttack;
+    }
+	return attacks;
+}
 [[nodiscard]]uint64_t getRookAttacks(int square, uint64_t occupiedBitboard);
 [[nodiscard]]uint64_t getBishopAttacks(int square, uint64_t occupiedBitboard);
 [[nodiscard]]uint64_t getPawnPushes(uint64_t pawnBitboard, uint64_t emptyBitboard, int colorToMove);
