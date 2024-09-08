@@ -399,6 +399,9 @@ int Board::getMoves(std::array<Move, 256> &moves) {
         }
     }
     uint64_t mask = stateHistory.back().coloredBitboards[colorToMove] ^ getColoredPieceBitboard(colorToMove, Pawn);
+    if(__builtin_popcountll(stateHistory.back().checkers) == 2) {
+        mask = getColoredPieceBitboard(colorToMove, King);
+    }
     // the rest of the pieces
     while(mask != 0) {
         uint8_t startSquare = popLSB(mask);
@@ -422,78 +425,80 @@ int Board::getMoves(std::array<Move, 256> &moves) {
             totalMoves++;
         }
     }
-    // pawn pushes
-    uint64_t pawnBitboard = getColoredPieceBitboard(colorToMove, Pawn);
-    uint64_t emptyBitboard = ~occupiedBitboard;
-    uint64_t pawnPushes = getPawnPushes(pawnBitboard, emptyBitboard, colorToMove);
-    uint64_t doublePawnPushes = getDoublePawnPushes(pawnPushes, emptyBitboard, colorToMove);
-    uint64_t pawnPushPromotions = pawnPushes & getRankMask(7 * colorToMove);
-    pawnPushes ^= pawnPushPromotions;
-    while(pawnPushes != 0) {
-        uint8_t index = popLSB(pawnPushes);
-        uint8_t startSquare = (index + directionalOffsets[colorToMove]);
-        moves[totalMoves] = Move(startSquare, index, Normal);
-        totalMoves++;
-    }
-    while(doublePawnPushes != 0) {
-        uint8_t index = popLSB(doublePawnPushes);
-        uint8_t startSquare = (index + (directionalOffsets[colorToMove] * 2));
-        assert(getType(pieceAtIndex(startSquare)) == Pawn);
-        moves[totalMoves] = Move(startSquare, index, DoublePawnPush);
-        totalMoves++;
-    }
-    while(pawnPushPromotions != 0) {
-        uint8_t index = popLSB(pawnPushPromotions);
-        uint8_t startSquare = (index + directionalOffsets[colorToMove]);
-        for(int type = Knight; type < King; type++) {
-            moves[totalMoves] = Move(startSquare, index, promotions[type-1]);
+    if(__builtin_popcountll(stateHistory.back().checkers) != 2) {
+        // pawn pushes
+        uint64_t pawnBitboard = getColoredPieceBitboard(colorToMove, Pawn);
+        uint64_t emptyBitboard = ~occupiedBitboard;
+        uint64_t pawnPushes = getPawnPushes(pawnBitboard, emptyBitboard, colorToMove);
+        uint64_t doublePawnPushes = getDoublePawnPushes(pawnPushes, emptyBitboard, colorToMove);
+        uint64_t pawnPushPromotions = pawnPushes & getRankMask(7 * colorToMove);
+        pawnPushes ^= pawnPushPromotions;
+        while(pawnPushes != 0) {
+            uint8_t index = popLSB(pawnPushes);
+            uint8_t startSquare = (index + directionalOffsets[colorToMove]);
+            moves[totalMoves] = Move(startSquare, index, Normal);
             totalMoves++;
         }
-    }
-    // pawn captures
-    uint64_t capturable = stateHistory.back().coloredBitboards[1 - colorToMove];
-    if(stateHistory.back().enPassantIndex != 64) {
-        capturable |= squareToBitboard[stateHistory.back().enPassantIndex];
-    }
-
-    uint64_t leftCaptures = (colorToMove == 0 ? pawnBitboard >> 9 : pawnBitboard << 7);
-    leftCaptures &= ~getFileMask(7);
-    leftCaptures &= capturable;
-    uint64_t leftCapturePromotions = leftCaptures & getRankMask(7 * colorToMove);
-    leftCaptures ^= leftCapturePromotions;
-
-    uint64_t rightCaptures = (colorToMove == 0 ? pawnBitboard >> 7 : pawnBitboard << 9);
-    rightCaptures &= ~getFileMask(0);
-    rightCaptures &= capturable;
-    uint64_t rightCapturePromotions = rightCaptures & getRankMask(7 * colorToMove);
-    rightCaptures ^= rightCapturePromotions;
-
-    while(leftCaptures != 0) {
-        int index = popLSB(leftCaptures);
-        int startSquare = index + (colorToMove == 0 ? 9 : -7);
-        moves[totalMoves] = Move(startSquare, index, (index == stateHistory.back().enPassantIndex ? EnPassant : Normal));
-        totalMoves++;
-    }
-    while(rightCaptures != 0) {
-        int index = popLSB(rightCaptures);
-        int startSquare = index + (colorToMove == 0 ? 7 : -9);
-        moves[totalMoves] = Move(startSquare, index, (index == stateHistory.back().enPassantIndex ? EnPassant : Normal));
-        totalMoves++;
-    }
-    while(leftCapturePromotions != 0) {
-        int index = popLSB(leftCapturePromotions);
-        int startSquare = index + (colorToMove == 0 ? 9 : -7);
-        for(int type = Knight; type < King; type++) {
-            moves[totalMoves] = Move(startSquare, index, promotions[type-1]);
+        while(doublePawnPushes != 0) {
+            uint8_t index = popLSB(doublePawnPushes);
+            uint8_t startSquare = (index + (directionalOffsets[colorToMove] * 2));
+            assert(getType(pieceAtIndex(startSquare)) == Pawn);
+            moves[totalMoves] = Move(startSquare, index, DoublePawnPush);
             totalMoves++;
         }
-    }
-    while(rightCapturePromotions != 0) {
-        int index = popLSB(rightCapturePromotions);
-        int startSquare = index + (colorToMove == 0 ? 7 : -9);
-        for(int type = Knight; type < King; type++) {
-            moves[totalMoves] = Move(startSquare, index, promotions[type-1]);
+        while(pawnPushPromotions != 0) {
+            uint8_t index = popLSB(pawnPushPromotions);
+            uint8_t startSquare = (index + directionalOffsets[colorToMove]);
+            for(int type = Knight; type < King; type++) {
+                moves[totalMoves] = Move(startSquare, index, promotions[type-1]);
+                totalMoves++;
+            }
+        }
+        // pawn captures
+        uint64_t capturable = stateHistory.back().coloredBitboards[1 - colorToMove];
+        if(stateHistory.back().enPassantIndex != 64) {
+            capturable |= squareToBitboard[stateHistory.back().enPassantIndex];
+        }
+
+        uint64_t leftCaptures = (colorToMove == 0 ? pawnBitboard >> 9 : pawnBitboard << 7);
+        leftCaptures &= ~getFileMask(7);
+        leftCaptures &= capturable;
+        uint64_t leftCapturePromotions = leftCaptures & getRankMask(7 * colorToMove);
+        leftCaptures ^= leftCapturePromotions;
+
+        uint64_t rightCaptures = (colorToMove == 0 ? pawnBitboard >> 7 : pawnBitboard << 9);
+        rightCaptures &= ~getFileMask(0);
+        rightCaptures &= capturable;
+        uint64_t rightCapturePromotions = rightCaptures & getRankMask(7 * colorToMove);
+        rightCaptures ^= rightCapturePromotions;
+
+        while(leftCaptures != 0) {
+            int index = popLSB(leftCaptures);
+            int startSquare = index + (colorToMove == 0 ? 9 : -7);
+            moves[totalMoves] = Move(startSquare, index, (index == stateHistory.back().enPassantIndex ? EnPassant : Normal));
             totalMoves++;
+        }
+        while(rightCaptures != 0) {
+            int index = popLSB(rightCaptures);
+            int startSquare = index + (colorToMove == 0 ? 7 : -9);
+            moves[totalMoves] = Move(startSquare, index, (index == stateHistory.back().enPassantIndex ? EnPassant : Normal));
+            totalMoves++;
+        }
+        while(leftCapturePromotions != 0) {
+            int index = popLSB(leftCapturePromotions);
+            int startSquare = index + (colorToMove == 0 ? 9 : -7);
+            for(int type = Knight; type < King; type++) {
+                moves[totalMoves] = Move(startSquare, index, promotions[type-1]);
+                totalMoves++;
+            }
+        }
+        while(rightCapturePromotions != 0) {
+            int index = popLSB(rightCapturePromotions);
+            int startSquare = index + (colorToMove == 0 ? 7 : -9);
+            for(int type = Knight; type < King; type++) {
+                moves[totalMoves] = Move(startSquare, index, promotions[type-1]);
+                totalMoves++;
+            }
         }
     }
     return totalMoves;

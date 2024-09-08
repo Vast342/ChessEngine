@@ -541,6 +541,11 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
         Move move = moves[i];
         // islegal check
         if(!board.isLegal(move)) continue;
+
+        // TT prefetching
+        uint64_t afterKey = board.keyAfter(move);
+        __builtin_prefetch(TT->getEntry(afterKey));
+        
         if(move == stack[ply].excluded) continue;
         int moveStartSquare = move.getStartSquare();
         int movedPiece = board.pieceAtIndex(moveStartSquare);
@@ -559,10 +564,6 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
         if(depth <= sprDepthCondition.value && isQuietOrBadCapture && bestScore > matedScore + 256 && !see(board, move, depth * (isCapture ? sprCaptureThreshold.value : sprQuietThreshold.value))) continue;
         // History Pruning
         if(ply > 0 && !isPV && isQuiet && depth <= hipDepthCondition.value && moveValues[i] < hipDepthMultiplier.value * depth) break;
-
-        // TT prefetching
-        uint64_t afterKey = board.keyAfter(move);
-        __builtin_prefetch(TT->getEntry(afterKey));
 
         int TTExtensions = 0;
         // determine whether or not to extend TT move (Singular Extensions)
