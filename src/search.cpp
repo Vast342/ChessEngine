@@ -848,7 +848,6 @@ Move Engine::think(Board board, int softBound, int hardBound, bool info) {
                 }
             }
             if(board.isLegal(moves[i])) {
-                board.undoMove<true>();
                 rootBestMove = moves[i];
                 break;
             }
@@ -977,7 +976,6 @@ Move Engine::fixedDepthSearch(Board board, int depthToSearch, bool info) {
                 }
             }
             if(board.isLegal(moves[i])) {
-                board.undoMove<true>();
                 rootBestMove = moves[i];
                 break;
             }
@@ -1063,7 +1061,6 @@ std::pair<Move, int> Engine::dataGenSearch(Board board, int nodeCap) {
                 }
             }
             if(board.isLegal(moves[i])) {
-                board.undoMove<true>();
                 rootBestMove = moves[i];
                 break;
             }
@@ -1138,7 +1135,6 @@ Move Engine::fixedNodesSearch(Board board, int nodeCount, bool info) {
                 }
             }
             if(board.isLegal(moves[i])) {
-                board.undoMove<true>();
                 rootBestMove = moves[i];
                 break;
             }

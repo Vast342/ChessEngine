@@ -7,8 +7,8 @@ inline std::array<std::array<uint64_t, 64>, 64> generateBetweenRays() {
 	for(int from = 0; from < 64; from++) {
 		const uint64_t fromMask = 1ULL << from;
 
-		const uint64_t rookAttacks = rookMasks[from];
-		const uint64_t bishopAttacks = bishopMasks[from];
+		const uint64_t rookAttacks = getRookAttacks(from, 0);
+		const uint64_t bishopAttacks = getBishopAttacks(from, 0);
 
 		for(int to = 0; to < 64; to++) {
 			if(from == to) continue;
@@ -31,8 +31,8 @@ inline std::array<std::array<uint64_t, 64>, 64> generateIntersectingRays() {
 	for(int from = 0; from < 64; from++) {
 		const uint64_t fromMask = 1ULL << from;
 
-		const uint64_t rookAttacks = rookMasks[from];
-		const uint64_t bishopAttacks = bishopMasks[from];
+		const uint64_t rookAttacks = getRookAttacks(from, 0);
+		const uint64_t bishopAttacks = getBishopAttacks(from, 0);
 
 		for(int to = 0; to < 64; to++) {
 			if(from == to) continue;

@@ -123,7 +123,6 @@ double runGame(Engine &engine, std::vector<std::string>& fenVector, Board board)
                 if(board.isLegal(PLmoves[j])) {
                     moves[legalMoves] = PLmoves[j];
                     legalMoves++;
-                    board.undoMove<true>();
                 }
             }
             // checkmate or stalemate? doesn't matter, restart

@@ -82,6 +82,7 @@ struct BoardState {
     uint64_t pawnHash;
     uint64_t threats;
     uint64_t checkers;
+    uint64_t pinned;
 };
 
 // a single move, stored in 16 bits
@@ -141,6 +142,8 @@ struct Board {
         int getPawnHashIndex() const;
         uint64_t getThreats() const;
         uint64_t calculateThreats();
+        uint64_t getPinneds();
+        uint64_t getCheckers();
     private:
         int plyCount;
         uint8_t colorToMove;
