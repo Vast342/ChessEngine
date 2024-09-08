@@ -17,6 +17,7 @@
 */
 #include "globals.h"
 #include "slidey.h"
+#include "rays.h"
 
 // takes a piece number and gets the type of it
 int getType(int value) {
@@ -100,6 +101,8 @@ void initialize() {
     generateLookups();
     initializeZobrist();
     calculateReductions();
+    BetweenRays = generateBetweenRays();
+    IntersectingRays = generateIntersectingRays();
 }
 
 // splits a string into segments based on the seperator

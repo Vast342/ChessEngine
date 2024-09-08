@@ -875,6 +875,10 @@ bool Board::isRepeatedPosition() {
 }
 
 bool Board::isLegal(const Move& move) {
+    return false;
+}
+
+bool Board::isPseudoLegal(const Move& move) {
     std::array<Move, 256> moves;
     const int totalMoves = getMoves(moves);
     for(int i = 0; i < totalMoves; i++) {

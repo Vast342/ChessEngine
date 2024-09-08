@@ -128,6 +128,7 @@ struct Board {
         uint64_t fullZobristRegen();
         bool isRepeatedPosition();
         bool isLegal(const Move& move);
+        bool isPseudoLegal(const Move& move);
         uint64_t getAttackers(int square) const;
         uint64_t getColoredBitboard(int color) const;
         uint64_t getPieceBitboard(int piece) const;

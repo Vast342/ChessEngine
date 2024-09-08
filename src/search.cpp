@@ -539,6 +539,8 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
 
         // information gathering
         Move move = moves[i];
+        // islegal check
+        if(!board.isLegal(move)) continue;
         if(move == stack[ply].excluded) continue;
         int moveStartSquare = move.getStartSquare();
         int movedPiece = board.pieceAtIndex(moveStartSquare);
@@ -594,7 +596,6 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
         if(isCapture) {
             moveVictim = getType(board.pieceAtIndex(moveEndSquare));
         }
-        if(!board.isLegal(move)) continue;
         board.makeMove<true>(move);
 
         stack[ply].ch_entry = &(*conthistTable)[board.getColorToMove()][getType(board.pieceAtIndex(moveEndSquare))][moveEndSquare][moveVictim];
@@ -737,7 +738,7 @@ std::string Engine::getPV(Board board, std::vector<uint64_t> &hashVector, int nu
     Transposition* entry = TT->getEntry(hash);
     if(entry->zobristKey == shrink(hash) && entry->flag == Exact) {
         Move bestMove = entry->bestMove;
-        if(bestMove != Move() && board.isLegal(bestMove)) {
+        if(bestMove != Move() && board.isPseudoLegal(bestMove)) {
             board.makeMove<false>(bestMove);
             std::string restOfPV = getPV(board, hashVector, numEntries);
             pv = toLongAlgebraic(bestMove) + " " + restOfPV;
