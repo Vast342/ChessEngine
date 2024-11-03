@@ -19,7 +19,7 @@ BUILD_DIR := build
 
 # Source files
 SRCS := $(filter-out src/external/fathom/tbchess.cpp, $(wildcard src/external/fathom/*.cpp))
-SRCS += $(filter-out src/magic.cpp src/datagen.cpp src/wdldatagen.cpp, $(wildcard src/*.cpp))
+SRCS += $(filter-out src/magic.cpp src/uci.cpp src/wdldatagen.cpp, $(wildcard src/*.cpp))
 OBJS := $(addprefix $(BUILD_DIR)/,$(notdir $(SRCS:.cpp=.o)))
 
 
