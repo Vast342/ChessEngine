@@ -251,34 +251,36 @@ int16_t Engine::qSearch(Board &board, int alpha, int beta, int16_t ply) {
         return entry->score;
     }
 
-    // stand pat shenanigans
+    int16_t bestScore = matedScore;
     int staticEval = 0;
-    if(entry->zobristKey == shrink(hash)) {
-        staticEval = entry->staticEval;
-    } else {
-        staticEval = board.getEvaluation();
+    if(!board.isInCheck()) {
+        // stand pat shenanigans
+        if(entry->zobristKey == shrink(hash)) {
+            staticEval = entry->staticEval;
+        } else {
+            staticEval = board.getEvaluation();
+        }
+        if(ply > depthLimit - 1) return staticEval;
+
+        // corrections
+        const int ctm = board.getColorToMove();
+        int chpawnHash = board.getPawnHashIndex() & Corrhist::mask;
+        auto nonPawnHash = board.getNonPawnHash();
+        staticEval = corrhist.correct(ctm, chpawnHash, staticEval, nonPawnHash);
+
+        // adjust staticEval to TT score if it's good enough
+        if(shrink(hash) == entry->zobristKey && (
+            entry->flag == Exact ||
+            (entry->flag == BetaCutoff && entry->score >= staticEval) ||
+            (entry->flag == FailLow && entry->score <= staticEval)
+        )) {
+            staticEval = entry->score;
+        }
+
+        bestScore = staticEval;
+        if(bestScore >= beta) return bestScore;
+        if(alpha < bestScore) alpha = bestScore;
     }
-    if(ply > depthLimit - 1) return staticEval;
-
-    // corrections
-    const int ctm = board.getColorToMove();
-    int chpawnHash = board.getPawnHashIndex() & Corrhist::mask;
-    auto nonPawnHash = board.getNonPawnHash();
-    staticEval = corrhist.correct(ctm, chpawnHash, staticEval, nonPawnHash);
-
-    // adjust staticEval to TT score if it's good enough
-    if(shrink(hash) == entry->zobristKey && (
-        entry->flag == Exact ||
-        (entry->flag == BetaCutoff && entry->score >= staticEval) ||
-        (entry->flag == FailLow && entry->score <= staticEval)
-    )) {
-        staticEval = entry->score;
-    }
-
-
-    int16_t bestScore = staticEval;
-    if(bestScore >= beta) return bestScore;
-    if(alpha < bestScore) alpha = bestScore;
 
     // get the legal moves and sort them
     std::array<Move, 256> moves;
