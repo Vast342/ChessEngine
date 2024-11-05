@@ -500,7 +500,7 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
     }
 
     // Razoring
-    if(!isPV && staticEval < alpha - razDepthMultiplier.value * depth) {
+    if(!inCheck && !isPV && staticEval < alpha - razDepthMultiplier.value * depth) {
         int score = qSearch(board, alpha, beta, ply);
         if(score < alpha) {
             return score;
