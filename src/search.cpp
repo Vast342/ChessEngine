@@ -212,7 +212,7 @@ void Engine::scoreMovesQS(const Board& board, std::array<Move, 256> &moves, std:
             // Captures!
             const int victim = getType(board.pieceAtIndex(end));
             // Capthist!
-            values[i] = MVV_values[victim]->value + qsHistoryTable[colorToMove][piece][end][victim];
+            values[i] = MVV_values[victim]->value + (qsHistoryTable[colorToMove][piece][end][victim] + noisyHistoryTable[colorToMove][piece][end][victim]) / 2;
         }
     }
 }
