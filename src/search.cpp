@@ -539,9 +539,6 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
     bool bestIsCapture = false;
     int flag = FailLow;
 
-    // extensions, currently only extending if you are in check
-    depth += inCheck;
-
     // Mate Distance Pruning (I will test it at some point I swear)
     if(!isPV) {    
         const auto mdAlpha = std::max(alpha, matedScore + ply);
