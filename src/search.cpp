@@ -431,7 +431,10 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
     const bool inCheck = board.isInCheck();
     stack[ply].inCheck = inCheck;
     // activate q search if at the end of a branch
-    if(depth <= 0 && !inCheck) return qSearch(board, alpha, beta, ply);
+    if(depth <= 0 && !inCheck) {
+        std::memset(qsHistoryTable.data(), 0, sizeof(qsHistoryTable));
+        return qSearch(board, alpha, beta, ply);
+    }
     const bool inSingularSearch = stack[ply].excluded != Move();
     const bool isPV = beta > alpha + 1;
     const uint64_t hash = board.getZobristHash();
