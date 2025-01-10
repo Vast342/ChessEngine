@@ -454,7 +454,7 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
 
     // Internal Iterative Reduction (IIR)
     // Things to test: alternative depth
-    if(!inSingularSearch && (entry->zobristKey != shrink(hash) || entry->bestMove == Move()) && depth > iirDepthCondition.value) depth--;
+    if(!inSingularSearch && (isPV || isCutNode) && (entry->zobristKey != shrink(hash) || entry->bestMove == Move()) && depth > iirDepthCondition.value) depth--;
 
     int staticEval = 0;
     int originalStaticEval = 0;
