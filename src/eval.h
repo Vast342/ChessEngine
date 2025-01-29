@@ -21,28 +21,43 @@
 
 /*
 Current Net: cn_028
-Arch: (768x6->1024)x2->1x8
+Arch: (768x8->1024)x2->1x16
 Activation: SCReLU
 Special Details: 
  - Horizontal Mirroring
  - Few more buckets, let's see if we can get some improvement from finny tables now
 */ 
 constexpr int inputSize = 768;
-constexpr int inputBucketCount = 6;
+constexpr int inputBucketCount = 8;
 constexpr int layer1Size = 1024;
-constexpr int outputBucketCount = 8;
+constexpr int outputBucketCount = 16;
 
-constexpr std::array<int, 64> inputBuckets = {
-    0, 0, 1, 1, 7, 7, 6, 6,
-    2, 2, 3, 3, 9, 9, 8, 8, 
-    4, 4, 4, 4,10,10,10,10,
-    4, 4, 4, 4,10,10,10,10,
-    5, 5, 5, 5,11,11,11,11,
-    5, 5, 5, 5,11,11,11,11,
-    5, 5, 5, 5,11,11,11,11,
-    5, 5, 5, 5,11,11,11,11,
-};
+constexpr std::array<int, 64> inputBuckets = []{
+    constexpr std::array<int, 32> rawInputBuckets = {
+        0, 1, 2, 3,
+        4, 4, 5, 5,
+        6, 6, 6, 6,
+        6, 6, 6, 6,
+        7, 7, 7, 7,
+        7, 7, 7, 7,
+        7, 7, 7, 7,
+        7, 7, 7, 7,
+    };
 
+    std::array<int, 64> result = {};
+
+    for(int rank = 0; rank < 8; rank++) {
+        for(int file = 0; file < 4; file++) {
+            const int src = rank * 4 + file;
+            const int dst = rank * 8 + file;
+            
+            result[dst] = rawInputBuckets[src];
+            result[dst ^ 7] = rawInputBuckets[src] + inputBucketCount;
+        }
+    }
+
+    return result;
+}();
 
 // organizing this somewhat similarly to code I've seen, mostly from clarity_sp_nnue, made by Ciekce.
 

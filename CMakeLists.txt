@@ -15,7 +15,6 @@ src/eval.cpp
 src/search.cpp
 src/tests.cpp
 src/tt.cpp
-src/tunables.cpp
 src/external/fathom/tbprobe.cpp)
 
 # Builds for V1 through V4, each with different featuresets.
@@ -48,11 +47,11 @@ target_link_libraries(Clarity_Native -static)
 
 target_link_libraries(Clarity_Datagen -static)
 
-target_compile_definitions(Clarity_x86-64-v1 PUBLIC NetworkFile="../src/cn_030.nnue")
-target_compile_definitions(Clarity_x86-64-v2 PUBLIC NetworkFile="../src/cn_030.nnue")
-target_compile_definitions(Clarity_x86-64-v3_Magic PUBLIC NetworkFile="../src/cn_030.nnue")
-target_compile_definitions(Clarity_x86-64-v3_BMI2 PUBLIC NetworkFile="../src/cn_030.nnue")
-target_compile_definitions(Clarity_x86-64-v4 PUBLIC NetworkFile="../src/cn_030.nnue")
-target_compile_definitions(Clarity_Native PUBLIC NetworkFile="../src/cn_030.nnue")
+target_compile_definitions(Clarity_x86-64-v1 PUBLIC NetworkFile="../src/cn_031.nnue")
+target_compile_definitions(Clarity_x86-64-v2 PUBLIC NetworkFile="../src/cn_031.nnue")
+target_compile_definitions(Clarity_x86-64-v3_Magic PUBLIC NetworkFile="../src/cn_031.nnue")
+target_compile_definitions(Clarity_x86-64-v3_BMI2 PUBLIC NetworkFile="../src/cn_031.nnue")
+target_compile_definitions(Clarity_x86-64-v4 PUBLIC NetworkFile="../src/cn_031.nnue")
+target_compile_definitions(Clarity_Native PUBLIC NetworkFile="../src/cn_031.nnue")
 
-target_compile_definitions(Clarity_Datagen PUBLIC NetworkFile="../src/cn_030.nnue")
+target_compile_definitions(Clarity_Datagen PUBLIC NetworkFile="../src/cn_031.nnue")
