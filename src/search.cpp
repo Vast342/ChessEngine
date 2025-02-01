@@ -684,6 +684,20 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
                     for (int i = 0; i < stack[ply + 1].pvLength; i++)
                         stack[ply].pvTable[i + 1] = stack[ply + 1].pvTable[i];
                 }
+                // slight history bonus for moves that raise alpha
+                int hash = board.getPawnHashIndex();
+                if(isQuiet) {
+                    // adds to the move's history and adjusts the killer move accordingly
+                    int start = moveStartSquare;
+                    int end = moveEndSquare;
+                    int piece = getType(board.pieceAtIndex(start));
+                    updateHistory(board.getColorToMove(), start, end, piece, legalMoves, ply, hash, board.squareIsUnderAttack(start), board.squareIsUnderAttack(end));
+                } else if (move.getFlag() < promotions[0] || move.getFlag() == promotions[3]) {
+                    const int end = move.getEndSquare();
+                    const int piece = getType(board.pieceAtIndex(move.getStartSquare()));
+                    const int victim = getType(board.pieceAtIndex(end));
+                    updateNoisyHistory(board.getColorToMove(), piece, end, victim, legalMoves);
+                }
             }
 
             // Fail-high
