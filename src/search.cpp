@@ -726,6 +726,16 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
                         }
                     }
                     break;
+                } else {
+                    // slight history bonus for moves that raise alpha
+                    int hash = board.getPawnHashIndex();
+                    if(isQuiet) {
+                        // adds to the move's history and adjusts the killer move accordingly
+                        int start = moveStartSquare;
+                        int end = moveEndSquare;
+                        int piece = getType(board.pieceAtIndex(start));
+                        updateHistory(board.getColorToMove(), start, end, piece, legalMoves * 4, ply, hash, board.squareIsUnderAttack(start), board.squareIsUnderAttack(end));
+                    }
                 }
             }
         }
