@@ -264,7 +264,9 @@ int16_t Engine::qSearch(Board &board, int alpha, int beta, int16_t ply) {
     const int ctm = board.getColorToMove();
     int chpawnHash = board.getPawnHashIndex() & Corrhist::mask;
     auto nonPawnHash = board.getNonPawnHash();
-    staticEval = corrhist.correct(ctm, chpawnHash, staticEval, nonPawnHash);
+    if(entry->bestMove == Move()) {
+        staticEval = corrhist.correct(ctm, chpawnHash, staticEval, nonPawnHash);
+    }
 
     // adjust staticEval to TT score if it's good enough
     if(shrink(hash) == entry->zobristKey && (
@@ -474,7 +476,7 @@ int16_t Engine::negamax(Board &board, int depth, int alpha, int beta, int16_t pl
     const int ctm = board.getColorToMove();
     int chpawnHash = board.getPawnHashIndex() & Corrhist::mask;
     auto nonPawnHash = board.getNonPawnHash();
-    if(inSingularSearch || entry->bestMove != Move()) {
+    if(inSingularSearch || entry->bestMove == Move()) {
         staticEval = corrhist.correct(ctm, chpawnHash, staticEval, nonPawnHash);
     }
     auto correction = staticEval - originalStaticEval;
